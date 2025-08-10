@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sujeet Kansal - Interactive CV</title>
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- jsPDF and html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    @keyframes movingBg {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    body {
+      background: linear-gradient(270deg, #a5b4fc, #fbcfe8, #bbf7d0, #fde68a, #c084fc, #a5b4fc);
+      background-size: 1500% 1500%;
+      animation: movingBg 60s ease infinite;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #1e293b;
+      transition: background 0.5s, color 0.5s;
+    }
+    body.dark {
+      background: linear-gradient(270deg, #0f172a, #1e293b, #312e81, #7c3aed, #be185d, #0f172a);
+      background-size: 1500% 1500%;
+      animation: movingBg 60s ease infinite;
+      color: #e0e7ff;
+    }
+    body.dark h1, body.dark h2, body.dark h3 {
+      color: #e0e7ff;
+    }
+    body.dark p, body.dark li {
+      color: #cbd5e1;
+    }
+    body.dark a {
+      color: #60a5fa;
+      transition: color 0.3s;
+    }
+    body.dark a:hover {
+      color: #93c5fd;
+    }
+    body.dark section > div {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    @keyframes fadeUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    nav.pill-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      margin-bottom: 2rem;
+      transition: background 0.3s;
+      flex-wrap: wrap;
+    }
+    nav.pill-nav button {
+      font-weight: 600;
+      border-radius: 9999px;
+      padding: 0.55rem 1.5rem;
+      font-size: 1.05rem;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+      user-select: none;
+      outline-offset: 3px;
+      height: 42px;
+    }
+    nav.pill-nav button:focus-visible {
+      outline: 3px dashed #2563eb;
+    }
+    nav.pill-nav button:hover {
+      background: #93c5fd;
+      color: #1e293b;
+      box-shadow: 0 4px 20px rgba(59,130,246,0.2);
+    }
+    nav.pill-nav button.active {
+      background: #2563eb;
+      color: white;
+      box-shadow: 0 4px 28px rgba(37,99,235,0.45);
+    }
+    body.dark nav.pill-nav button {
+      background: rgba(255 255 255 / 0.1);
+      color: #cbd5e1;
+    }
+    body.dark nav.pill-nav button:hover {
+      background: #334155;
+      color: #e0e7ff;
+    }
+    body.dark nav.pill-nav button.active {
+      background: #60a5fa;
+      color: #0f172a;
+      box-shadow: 0 4px 18px rgba(96,165,250,0.7);
+    }
+    nav.pill-nav .dark-toggle {
+      display: flex;
+      align-items: center;
+    }
+    .toggle-input {
+      display: none;
+    }
+    .toggle-wrapper {
+      height: 42px;
+      width: 120px;
+      padding: 3px;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #ff6b9d, #ffa726);
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      position: relative;
+    }
+    .toggle-input:checked + .toggle-label .toggle-wrapper {
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    }
+    .toggle-track {
+      position: relative;
+      height: 36px;
+      width: 114px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      transition: background-color 0.3s;
+    }
+    .toggle-text {
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      letter-spacing: 0.5px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .toggle-slider {
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 30px;
+      height: 30px;
+      background-color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 2;
+    }
+    .toggle-slider .sun-icon {
+      display: block;
+      font-size: 14px;
+    }
+    .toggle-slider .moon-icon {
+      display: none;
+      font-size: 14px;
+    }
+    .toggle-input:checked + .toggle-label .toggle-slider {
+      transform: translateX(82px);
+    }
+    .toggle-input:checked + .toggle-label .sun-icon {
+      display: none;
+    }
+    .toggle-input:checked + .toggle-label .moon-icon {
+      display: block;
+    }
+    .toggle-wrapper:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+    .skill-badge {
+      background: rgba(255 255 255 / 0.4);
+      border: 1px solid rgba(255 255 255 / 0.5);
+      padding: 0.3rem 0.8rem;
+      font-size: 0.875rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      transition: background 0.3s, color 0.3s;
+      user-select: none;
+      margin-bottom: 0.25rem;
+      color: #1e293b;
+      display: inline-block;
+    }
+    .skill-badge:hover {
+      background: rgba(255 255 255 / 0.65);
+    }
+    body.dark .skill-badge {
+      color: #e0e7ff;
+      background: rgba(255 255 255 / 0.15);
+      border-color: rgba(255 255 255 / 0.35);
+    }
+    section > div {
+      background: rgba(255 255 255 / 0.55);
+      padding: 1.5rem 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 20px rgba(255 255 255 / 0.2);
+      backdrop-filter: blur(10px);
+      transition: background 0.3s;
+      margin-bottom: 1.5rem;
+    }
+    body.dark section > div {
+      background: rgba(15 23 42 / 0.75);
+      box-shadow: 0 10px 35px rgba(0 0 15 / 0.5);
+    }
+    img.profile-photo {
+      width: 7rem;
+      height: 7rem;
+      border-radius: 9999px;
+      border: 4px solid white;
+      box-shadow: 0 10px 20px rgba(0 0 0 / 0.3);
+      object-fit: cover;
+      user-select: none;
+      opacity: 0;
+      transition: opacity 1s, transform 1s;
+      transform: scale(0.95);
+    }
+    img.profile-photo.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .name-title {
+      font-weight: 700;
+      font-size: 2.2rem;
+      color: inherit;
+      margin-bottom: 0.5rem;
+      user-select: text;
+      line-height: 1.1;
+    }
+    h3 {
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+      user-select: text;
+      color: inherit;
+    }
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      user-select: text;
+      color: inherit;
+      margin-bottom: 0.75rem;
+    }
+    span.role-availability {
+      display: inline-block;
+      background: rgba(255 255 255 / 0.65);
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #1e293b;
+      padding: 0.25rem 1rem;
+      margin-top: 0.25rem;
+      box-shadow: 0 2px 8px rgba(0 0 0 / 0.1);
+      user-select: text;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark span.role-availability {
+      background: rgba(255 255 255 / 0.2);
+      color: #e0e7ff;
+    }
+    .contact-links a {
+      color: #2563eb;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .contact-links a:hover,
+    .contact-links a:focus-visible {
+      color: #1e40af;
+      outline: none;
+      text-decoration: underline;
+    }
+    body.dark .contact-links a {
+      color: #60a5fa;
+    }
+    body.dark .contact-links a:hover {
+      color: #93c5fd;
+    }
+    #downloadPdfBtn {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: #2563eb;
+      color: white;
+      padding: 0.82em 1.8em;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.6em;
+      z-index: 100;
+      border: none;
+      transition: background 0.3s, transform 0.15s;
+    }
+    #downloadPdfBtn:hover, #downloadPdfBtn:focus-visible {
+      background: #1e40af;
+      outline: none;
+      transform: scale(0.98);
+    }
+    #downloadPdfBtn:disabled {
+      background: #2563eb99;
+      cursor: wait;
+      transform: none;
+    }
+    #pdfSuccessMsg {
+      position: fixed;
+      bottom: 5.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #16a34a;
+      color: white;
+      padding: 0.9em 1.5em;
+      border-radius: 1rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      display: none;
+      box-shadow: 0 0 16px rgba(22, 163, 74, 0.7);
+      z-index: 101;
+    }
+    .skill-bar-container {
+      width: 100%;
+      background-color: #dbeafe;
+      border-radius: 9999px;
+      height: 18px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.1);
+    }
+    body.dark .skill-bar-container {
+      background-color: #1e293b;
+    }
+    .skill-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #2563eb, #3b82f6);
+      border-radius: 9999px;
+      box-shadow: 0 3px 10px rgb(37 99 235 / 0.5);
+      transition: width 1.5s ease-out;
+    }
+    body.dark .skill-bar {
+      background: linear-gradient(90deg, #60a5fa, #2563eb);
+      box-shadow: 0 4px 16px rgb(96 165 250 / 0.8);
+    }
+    .skill-label {
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      user-select: none;
+      font-size: 1rem;
+      color: inherit;
+    }
+    @media (max-width: 640px) {
+      .name-title { font-size: 1.8rem;}
+      h3 { font-size: 1.1rem;}
+      nav.pill-nav {
+        gap: 0.6rem;
+        padding: 0.4rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      nav.pill-nav button {
+        padding: 0.45rem 1.2rem;
+        font-size: 0.95rem;
+      }
+      .toggle-wrapper {
+        width: 100px;
+      }
+      .toggle-track {
+        width: 94px;
+      }
+      .toggle-input:checked + .toggle-label .toggle-slider {
+        transform: translateX(62px);
+      }
+      #downloadPdfBtn {
+        bottom: 0.75rem;
+        right: 0.75rem;
+        padding: 0.7em 1.5em;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation with Dark Mode Toggle -->
+  <nav class="pill-nav" role="tablist" aria-label="Primary">
+    <button id="btn-profile" role="tab" aria-controls="profile" aria-selected="true" tabindex="0" class="active">Profile</button>
+    <button id="btn-experience" role="tab" aria-controls="experience" aria-selected="false" tabindex="-1">Experience</button>
+    <button id="btn-skills" role="tab" aria-controls="skills" aria-selected="false" tabindex="-1">Skills</button>
+    <button id="btn-certificates" role="tab" aria-controls="certificates" aria-selected="false" tabindex="-1">Certificates</button>
+    <button id="btn-projects" role="tab" aria-controls="projects" aria-selected="false" tabindex="-1">Projects</button>
+    <button id="btn-achievements" role="tab" aria-controls="achievements" aria-selected="false" tabindex="-1">Achievements</button>
+    <button id="btn-hobbies" role="tab" aria-controls="hobbies" aria-selected="false" tabindex="-1">Hobbies</button>
+    <div class="dark-toggle">
+      <input type="checkbox" id="dayNightToggle" class="toggle-input">
+      <label for="dayNightToggle" class="toggle-label">
+        <div class="toggle-wrapper">
+          <div class="toggle-track">
+            <span class="toggle-text" id="toggleText">DAY</span>
+            <div class="toggle-slider">
+              <span class="sun-icon">☀️</span>
+              <span class="moon-icon">🌙</span>
+            </div>
+          </div>
+        </div>
+      </label>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 pb-24" id="cvContent">
+    <!-- Profile -->
+    <section id="profile" role="tabpanel" tabindex="0" aria-labelledby="btn-profile">
+      <div class="flex flex-col items-center text-center">
+        <img src="profile.jpg" alt="Profile Photo" class="profile-photo visible" />
+        <h1 class="name-title">Sujeet Kansal</h1>
+        <p>Cybersecurity Analyst &bull; Ethical Hacker &bull; Software Developer &bull; Frontend Developer</p>
+        <span class="role-availability">Available for full-time</span>
+        <div class="contact-links flex flex-wrap justify-center gap-5 mt-4 text-base">
+          <span><strong>Phone:</strong> <a href="tel:+919917128864">+91 9917128864</a></span>
+          <span><strong>Email:</strong> <a href="mailto:kansalsujeetdps@gmail.com">kansalsujeetdps@gmail.com</a></span>
+          <span><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/sujeet-kansal-102328282" target="_blank" rel="noopener noreferrer">Sujeet Kansal</a></span>
+          <span><strong>GitHub:</strong> <a href="https://github.com/white-venom" target="_blank" rel="noopener noreferrer">white-venom</a></span>
+        </div>
+      </div>
+      <div class="content-wrapper mt-8">
+        <h3>Education</h3>
+        <ul class="list-disc list-inside leading-relaxed">
+          <li>
+            <strong>B.Tech in Computer Science and Engineering with Cyber Security [2023-2027]</strong><br />
+            Bennett University (The Times Group), Greater Noida<br />
+            Current year - 2024-2025 (2nd Year)
+          </li>
+          <li>
+            <strong>Schooling:</strong><br />
+            • Lal Bahadur Shastri Senior Secondary School, Kota<br />
+            • Gurukul The School, Ghaziabad<br />
+            • Delhi Public School, Hapur
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Experience -->
+    <section id="experience" role="tabpanel" tabindex="0" aria-labelledby="btn-experience" class="hidden" aria-hidden="true">
+      <div class="content-wrapper">
+        <p class="mb-4">As a Computer Science student specializing in Cybersecurity, I have worked on various projects combining programming, security, and hardware integration:</p>
+        <ul class="list-disc list-inside leading-relaxed">
+          <li><strong>Cybersecurity Projects:</strong> Firewall development, network penetration testing, password logging systems</li>
+          <li><strong>Software Development:</strong> AI-powered applications, games, calculators using Python, Java, and web technologies</li>
+          <li><strong>Hardware Integration:</strong> IoT projects with ESP32, ATtiny85-based security tools</li>
+          <li><strong>Web Development:</strong> Frontend development for chatbots and interactive applications</li>
+          <li><strong>Automation Tools:</strong> Python scripts for various automation tasks</li>
+        </ul>
+        <p class="mt-4 text-gray-500 dark:text-gray-400 italic">See Projects section for detailed project descriptions.</p>
+      </div>
+    </section>
+
+    <!-- Skills -->
+    <section id="skills" role="tabpanel" tabindex="0" aria-labelledby="btn-skills" class="hidden" aria-hidden="true">
+      <div class="flex flex-wrap gap-2 max-w-2xl mx-auto mb-6">
+        <span class="skill-badge">Python</span>
+        <span class="skill-badge">Java</span>
+        <span class="skill-badge">C++ / DSA</span>
+        <span class="skill-badge">HTML</span>
+        <span class="skill-badge">CSS</span>
+        <span class="skill-badge">React.js</span>
+        <span class="skill-badge">SQL</span>
+        <span class="skill-badge">R</span>
+        <span class="skill-badge">Cybersecurity</span>
+        <span class="skill-badge">Ethical Hacking</span>
+        <span class="skill-badge">Network Security</span>
+        <span class="skill-badge">Penetration Testing</span>
+        <span class="skill-badge">Nmap</span>
+        <span class="skill-badge">Burp Suite</span>
+        <span class="skill-badge">BlueShark</span>
+        <span class="skill-badge">Snort</span>
+        <span class="skill-badge">ESP32</span>
+        <span class="skill-badge">ATtiny85</span>
+        <span class="skill-badge">IoT</span>
+        <span class="skill-badge">Adobe Premiere Pro</span>
+        <span class="skill-badge">After Effects</span>
+        <span class="skill-badge">Video Editing</span>
+        <span class="skill-badge">Machine Learning</span>
+        <span class="skill-badge">TensorFlow</span>
+      </div>
+      
+      <div class="content-wrapper mt-8 max-w-2xl mx-auto">
+        <!-- Skill categories -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <h3 class="mb-3">Programming Languages</h3>
+            <ul class="list-disc list-inside leading-relaxed">
+              <li>Proficient in Python, Java, and DSA in C++</li>
+              <li>Experience with R for data analysis</li>
+              <li>SQL for database management</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="mb-3">Web Development</h3>
+            <ul class="list-disc list-inside leading-relaxed">
+              <li>HTML, CSS, and React.js</li>
+              <li>Responsive web applications</li>
+              <li>Interactive frontend development</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="mb-3">Cybersecurity</h3>
+            <ul class="list-disc list-inside leading-relaxed">
+              <li>Ethical hacking techniques</li>
+              <li>Network security and penetration testing</li>
+              <li>Tools: BlueShark, Nmap, Burp Suite, Snort</li>
+              <li>Vulnerability analysis and security practices</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="mb-3">Other Skills</h3>
+            <ul class="list-disc list-inside leading-relaxed">
+              <li>Adobe Premiere Pro and After Effects</li>
+              <li>IoT development with ESP32</li>
+              <li>Hardware security tools (ATtiny85)</li>
+              <li>Machine Learning with TensorFlow</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Certificates -->
+    <section id="certificates" role="tabpanel" tabindex="0" aria-labelledby="btn-certificates" class="hidden" aria-hidden="true">
+      <div class="content-wrapper max-w-2xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="mb-4">Programming & Development</h3>
+            <ul class="list-disc list-inside leading-relaxed space-y-2">
+              <li><strong>C++ Basic Structures:</strong> Vectors, Pointers, Strings, and Files - Codio</li>
+              <li><strong>C++ Basics:</strong> Selection and Iteration - Codio</li>
+              <li><strong>C++ Object Basics:</strong> Functions, Recursion, and Objects - Codio</li>
+              <li><strong>Object-Oriented C++:</strong> Inheritance and Encapsulation - Codio</li>
+              <li><strong>Object-Oriented Data Structures in C++</strong> - University of Illinois Urbana-Champaign</li>
+              <li><strong>Programming in C++:</strong> A Hands-on Introduction Specialization - Codio</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="mb-4">Data Science & Analytics</h3>
+            <ul class="list-disc list-inside leading-relaxed space-y-2">
+              <li><strong>Data Visualization with R</strong> - IBM</li>
+              <li><strong>Databases and SQL for Data Science with Python</strong> - IBM</li>
+            </ul>
+            
+            <h3 class="mb-4 mt-6">Cybersecurity</h3>
+            <ul class="list-disc list-inside leading-relaxed space-y-2">
+              <li><strong>Network Defense</strong> - Cisco</li>
+              <li><strong>Introduction to Cybersecurity</strong> - Cisco</li>
+              <li><strong>Learn Ethical Hacking From Scratch 2024</strong> - Udemy</li>
+              <li><strong>Learn Bug Bounty Hunting & Web Security Testing From Scratch</strong> - Udemy</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects -->
+    <section id="projects" role="tabpanel" tabindex="0" aria-labelledby="btn-projects" class="hidden" aria-hidden="true">
+      <div class="content-wrapper max-w-3xl mx-auto">
+        <div class="space-y-6">
+          <!-- Software Development Projects -->
+          <div>
+            <h3 class="mb-3">Software Development</h3>
+            <ul class="list-disc list-inside leading-relaxed space-y-2">
+              <li><strong>Scientific Calculator (Python with UI):</strong> Fully functional calculator with GUI using Python and Tkinter</li>
+              <li><strong>Hangman Game (Python):</strong> Classic word-guessing game with text-based interaction</li>
+              <li><strong>Brick Breaker Game (Java):</strong> Arcade-style game focusing on collision detection and user input</li>
+              <li><strong>Autotyper (Python):</strong> Automation script for simulating automatic typing</li>
+              <li><strong>Message Spammer (Python):</strong> Testing tool for message automation</li>
+            </ul>
+          </div>
+
+          <!-- AI/ML Projects -->
+          <div>
+            <h3 class="mb-3">AI & Machine Learning</h3>
+            <ul class="list-disc list-inside leading-relaxed space-y-2">
+              <li><strong>AI Digit Recognizer (Python):</strong> Machine learning model using TensorFlow for handwritten digit recognition</li>
+              <li><strong>AI CV Checker (R and Python):</strong> AI-powered resume analyzer that provides feedback based on job descriptions</li>
+            </ul>
+          </div>
+
+          <!-- Web Development Projects -->
+          <div>
+            <h3 class="mb-3">Web Development</h3>
+            <ul class="list-disc list-inside leading-relaxed space-y-2">
+              <li><strong>Museum Chatbot (Frontend):</strong> Interactive chatbot interface for visitor engagement</li>
+            </ul>
+          </div>
+
+          <!-- Cybersecurity Projects -->
+          <div>
+            <h3 class="mb-3">Cybersecurity & Network Security</h3>
+            <ul class="list-disc list-inside leading-relaxed space-y-2">
+              <li><strong>Password Logger (BlueShark):</strong> Network security testing and password analysis tool</li>
+              <li><strong>Local Firewall System:</strong> Comprehensive firewall using iptables, nftables, and Snort on Metasploitable2 with intrusion detection rules</li>
+              <li><strong>Automated Network Penetration Testing (Python):</strong> Script for automated vulnerability scanning and assessment</li>
+            </ul>
+          </div>
+
+          <!-- Hardware & IoT Projects -->
+          <div>
+            <h3 class="mb-3">Hardware & IoT</h3>
+            <ul class="list-disc list-inside leading-relaxed space-y-2">
+              <li><strong>WiFi Cloner (ESP32):</strong> System for replicating wireless networks for security testing</li>
+              <li><strong>WiFi Blocker (ESP32):</strong> Tool to prevent unauthorized network access</li>
+              <li><strong>ESP32 Camera Integration:</strong> IoT project for data capture and streaming</li>
+              <li><strong>Rubber Ducky (ATtiny85):</strong> USB payload delivery system for penetration testing</li>
+              <li><strong>iOS 4-Digit Passcode Breaker (ATtiny85):</strong> Hardware tool for security testing on mobile devices</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Achievements -->
+    <section id="achievements" role="tabpanel" tabindex="0" aria-labelledby="btn-achievements" class="hidden" aria-hidden="true">
+      <div class="content-wrapper max-w-2xl mx-auto">
+        <ul class="list-disc list-inside leading-relaxed">
+          <li><strong>Smart India Hackathon 2024:</strong> Secured 201st rank among more than 800 teams in All India SIH 2024</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Hobbies -->
+    <section id="hobbies" role="tabpanel" tabindex="0" aria-labelledby="btn-hobbies" class="hidden" aria-hidden="true">
+      <div class="content-wrapper max-w-2xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ul class="list-disc list-inside leading-relaxed space-y-2">
+            <li>Exploring ethical hacking and cybersecurity</li>
+            <li>Reviewing and experimenting with tech gadgets</li>
+            <li>Creative content creation and video editing</li>
+            <li>Working on IoT projects and hardware integration</li>
+          </ul>
+          <ul class="list-disc list-inside leading-relaxed space-y-2">
+            <li>Video games, especially strategy and simulation</li>
+            <li>Continuously learning new technologies</li>
+            <li>Enhancing skills in software development</li>
+            <li>Engaging in coding challenges and problem-solving</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button id="downloadPdfBtn" aria-label="Download your CV as PDF" title="Download CV as PDF">
+    <svg xmlns="http://www.w3.org/2000/svg" class="inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>
+    Download PDF
+  </button>
+
+<script>
+  const sections = ['profile','experience','skills','certificates','projects','achievements','hobbies'];
+
+  function showSection(section) {
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      const btn = document.getElementById('btn-' + id);
+      const isActive = (id === section);
+      if(el) el.classList.toggle('hidden', !isActive);
+      if(el) el.setAttribute('aria-hidden', !isActive);
+      if(btn) {
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive);
+        btn.tabIndex = isActive ? 0 : -1;
+      }
+      if(isActive && el) el.focus();
+    });
+  }
+  
+  sections.forEach(id => {
+    const btn = document.getElementById('btn-' + id);
+    if(btn) {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        showSection(id);
+        if(id === 'skills') animateSkillBars();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      btn.addEventListener('keydown', e => {
+        let idx = sections.indexOf(id);
+        if(e.key === "ArrowRight" || e.key === "ArrowDown") {
+          e.preventDefault();
+          const nxt = sections[(idx + 1) % sections.length];
+          document.getElementById('btn-' + nxt).focus();
+        } else if(e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          e.preventDefault();
+          const prev = sections[(idx - 1 + sections.length) % sections.length];
+          document.getElementById('btn-' + prev).focus();
+        }
+      });
+    }
+  });
+  showSection('profile');
+
+  function animateSkillBars() {
+    const bars = document.querySelectorAll('#skills .skill-bar');
+    bars.forEach(bar => bar.style.width = '0');
+    setTimeout(() => {
+      bars.forEach(bar => {
+        const lvl = bar.getAttribute('data-level');
+        bar.style.width = lvl + '%';
+      });
+    }, 150);
+  }
+
+  if (!document.getElementById('skills').classList.contains('hidden')) {
+    animateSkillBars();
+  }
+
+  const toggle = document.getElementById('dayNightToggle');
+  const toggleText = document.getElementById('toggleText');
+
+  toggle.addEventListener('change', () => {
+    document.body.classList.toggle('dark', toggle.checked);
+    toggleText.textContent = toggle.checked ? 'NIGHT' : 'DAY';
+  });
+
+  const pdfBtn = document.getElementById('downloadPdfBtn');
+  const pdfMsg = document.createElement('div');
+  pdfMsg.id = 'pdfSuccessMsg';
+  pdfMsg.textContent = '🎉 PDF downloaded successfully!';
+  document.body.appendChild(pdfMsg);
+  pdfMsg.style.display = 'none';
+
+  pdfBtn.addEventListener('click', async () => {
+    pdfBtn.disabled = true;
+    const originalText = pdfBtn.textContent;
+    pdfBtn.textContent = 'Generating PDF...';
+    window.scrollTo(0, 0);
+    try {
+      const canvas = await html2canvas(document.querySelector('main'), { scale: 2, backgroundColor: null });
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'pt', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = {
+        width: canvas.width,
+        height: canvas.height
+      };
+      const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height);
+      const imgWidth = imgProps.width * ratio;
+      const imgHeight = imgProps.height * ratio;
+      const x = (pageWidth - imgWidth) / 2;
+      const y = 20;
+      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+      pdf.save('Sujeet_Kansal_CV.pdf');
+
+      pdfMsg.style.display = 'block';
+      setTimeout(() => { pdfMsg.style.display = 'none'; }, 1800);
+    } catch (error) {
+      alert('Failed to generate PDF. Please try again.');
+    }
+    pdfBtn.disabled = false;
+    pdfBtn.textContent = originalText;
+    pdfBtn.blur();
+  });
+
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav.pill-nav');
+    if(window.scrollY > 10) {
+      nav.style.boxShadow = '0 4px 24px rgba(0,0,0,0.12)';
+    } else {
+      nav.style.boxShadow = '';
+    }
+  });
+</script>
+</body>
+</html>
