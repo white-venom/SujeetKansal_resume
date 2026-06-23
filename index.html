@@ -1,808 +1,736 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sujeet Kansal - Interactive CV</title>
-  <!-- Google Font -->
+  <title>Sujeet Kansal — Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- jsPDF and html2canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    @keyframes movingBg {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    :root {
+      --accent: #6366f1;
+      --accent2: #8b5cf6;
+      --accent3: #06b6d4;
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a26;
+      --border: rgba(99,102,241,0.2);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
     body {
-      background: linear-gradient(270deg, #a5b4fc, #fbcfe8, #bbf7d0, #fde68a, #c084fc, #a5b4fc);
-      background-size: 1500% 1500%;
-      animation: movingBg 60s ease infinite;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
       min-height: 100vh;
-      margin: 0;
-      font-family: 'Inter', system-ui, sans-serif;
-      color: #1e293b;
-      transition: background 0.5s, color 0.5s;
+      overflow-x: hidden;
     }
-    body.dark {
-      background: linear-gradient(270deg, #0f172a, #1e293b, #312e81, #7c3aed, #be185d, #0f172a);
-      background-size: 1500% 1500%;
-      animation: movingBg 60s ease infinite;
-      color: #e0e7ff;
+
+    /* Ambient background blobs */
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
     }
-    body.dark h1, body.dark h2, body.dark h3 {
-      color: #e0e7ff;
+    .blob1 { width: 600px; height: 600px; background: var(--accent); top: -200px; right: -200px; animation: blobMove 20s ease-in-out infinite alternate; }
+    .blob2 { width: 500px; height: 500px; background: var(--accent3); bottom: -100px; left: -150px; animation: blobMove 25s ease-in-out infinite alternate-reverse; }
+    .blob3 { width: 300px; height: 300px; background: var(--accent2); top: 40%; left: 40%; animation: blobMove 18s ease-in-out infinite alternate; }
+
+    @keyframes blobMove {
+      0%   { transform: translate(0,0) scale(1); }
+      100% { transform: translate(40px,30px) scale(1.08); }
     }
-    body.dark p, body.dark li {
-      color: #cbd5e1;
-    }
-    body.dark a {
-      color: #60a5fa;
-      transition: color 0.3s;
-    }
-    body.dark a:hover {
-      color: #93c5fd;
-    }
-    body.dark section > div {
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    @keyframes fadeUp {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    nav.pill-nav {
+
+    /* Nav */
+    nav {
       position: sticky;
       top: 0;
-      z-index: 50;
+      z-index: 100;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 1rem;
-      padding: 0.5rem 0;
-      margin-bottom: 2rem;
-      transition: background 0.3s;
+      justify-content: center;
+      gap: 0.4rem;
       flex-wrap: wrap;
     }
-    nav.pill-nav button {
-      font-weight: 600;
-      border-radius: 9999px;
-      padding: 0.55rem 1.5rem;
-      font-size: 1.05rem;
-      border: none;
+
+    .nav-btn {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
-      user-select: none;
-      outline-offset: 3px;
-      height: 42px;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
     }
-    nav.pill-nav button:focus-visible {
-      outline: 3px dashed #2563eb;
-    }
-    nav.pill-nav button:hover {
-      background: #93c5fd;
-      color: #1e293b;
-      box-shadow: 0 4px 20px rgba(59,130,246,0.2);
-    }
-    nav.pill-nav button.active {
-      background: #2563eb;
-      color: white;
-      box-shadow: 0 4px 28px rgba(37,99,235,0.45);
-    }
-    body.dark nav.pill-nav button {
-      background: rgba(255 255 255 / 0.1);
-      color: #cbd5e1;
-    }
-    body.dark nav.pill-nav button:hover {
-      background: #334155;
-      color: #e0e7ff;
-    }
-    body.dark nav.pill-nav button.active {
-      background: #60a5fa;
-      color: #0f172a;
-      box-shadow: 0 4px 18px rgba(96,165,250,0.7);
-    }
-    nav.pill-nav .dark-toggle {
-      display: flex;
-      align-items: center;
-    }
-    .toggle-input {
-      display: none;
-    }
-    .toggle-wrapper {
-      height: 42px;
-      width: 120px;
-      padding: 3px;
-      border-radius: 9999px;
-      background: linear-gradient(135deg, #ff6b9d, #ffa726);
-      display: flex;
-      align-items: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    .nav-btn:hover { color: var(--text); border-color: var(--border); background: rgba(99,102,241,0.08); }
+    .nav-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 20px rgba(99,102,241,0.4); }
+
+    .toggle-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.85rem;
       cursor: pointer;
-      position: relative;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      margin-left: 0.5rem;
     }
-    .toggle-input:checked + .toggle-label .toggle-wrapper {
-      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    .toggle-btn:hover { color: var(--text); }
+
+    /* LIGHT MODE */
+    body.light {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface2: #f1f5f9;
+      --border: rgba(99,102,241,0.2);
+      --text: #0f172a;
+      --muted: #64748b;
     }
-    .toggle-track {
+    body.light nav {
+      background: rgba(248,250,252,0.9);
+      border-color: rgba(99,102,241,0.15);
+    }
+    body.light .card { background: white; border-color: #e2e8f0; }
+    body.light .tag { background: #ede9fe; color: #6d28d9; }
+    body.light .mono { color: #6366f1; }
+
+    /* Main */
+    main { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 8rem; position: relative; z-index: 1; }
+
+    /* Section visibility */
+    .tab-section { display: none; }
+    .tab-section.active { display: block; animation: fadeUp 0.35s ease both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
       position: relative;
-      height: 36px;
-      width: 114px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 9999px;
-      display: flex;
-      align-items: center;
       overflow: hidden;
-      transition: background-color 0.3s;
     }
-    .toggle-text {
-      font-size: 12px;
-      font-weight: bold;
-      color: white;
-      letter-spacing: 0.5px;
+    .card:hover { border-color: rgba(99,102,241,0.4); box-shadow: 0 8px 40px rgba(99,102,241,0.1); }
+    .card::before {
+      content: '';
       position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(99,102,241,0.03) 0%, transparent 60%);
       pointer-events: none;
     }
-    .toggle-slider {
-      position: absolute;
-      left: 3px;
-      top: 3px;
-      width: 30px;
-      height: 30px;
-      background-color: #fff;
-      border-radius: 50%;
+
+    /* Profile header */
+    .profile-header {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      transition: transform 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      z-index: 2;
+      text-align: center;
+      padding: 3rem 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      margin-bottom: 1.25rem;
+      position: relative;
+      overflow: hidden;
     }
-    .toggle-slider .sun-icon {
-      display: block;
-      font-size: 14px;
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
     }
-    .toggle-slider .moon-icon {
-      display: none;
-      font-size: 14px;
+
+    .avatar {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; font-weight: 700;
+      color: white;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 8px 32px rgba(99,102,241,0.4);
     }
-    .toggle-input:checked + .toggle-label .toggle-slider {
-      transform: translateX(82px);
-    }
-    .toggle-input:checked + .toggle-label .sun-icon {
-      display: none;
-    }
-    .toggle-input:checked + .toggle-label .moon-icon {
-      display: block;
-    }
-    .toggle-wrapper:hover {
-      transform: scale(1.02);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-    }
-    .skill-badge {
-      background: rgba(255 255 255 / 0.4);
-      border: 1px solid rgba(255 255 255 / 0.5);
-      padding: 0.3rem 0.8rem;
-      font-size: 0.875rem;
-      border-radius: 9999px;
-      font-weight: 500;
-      backdrop-filter: blur(6px);
-      transition: background 0.3s, color 0.3s;
-      user-select: none;
-      margin-bottom: 0.25rem;
-      color: #1e293b;
-      display: inline-block;
-    }
-    .skill-badge:hover {
-      background: rgba(255 255 255 / 0.65);
-    }
-    body.dark .skill-badge {
-      color: #e0e7ff;
-      background: rgba(255 255 255 / 0.15);
-      border-color: rgba(255 255 255 / 0.35);
-    }
-    section > div {
-      background: rgba(255 255 255 / 0.55);
-      padding: 1.5rem 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 10px 20px rgba(255 255 255 / 0.2);
-      backdrop-filter: blur(10px);
-      transition: background 0.3s;
+
+    h1.name { font-size: 2.4rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+    .gradient-text { background: linear-gradient(135deg, var(--accent), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .tagline { color: var(--muted); font-size: 1rem; margin-bottom: 1.25rem; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(16,185,129,0.1); color: #10b981;
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 100px; padding: 0.35rem 1rem; font-size: 0.82rem; font-weight: 600;
       margin-bottom: 1.5rem;
     }
-    body.dark section > div {
-      background: rgba(15 23 42 / 0.75);
-      box-shadow: 0 10px 35px rgba(0 0 15 / 0.5);
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+
+    .contact-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+    .contact-chip {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.4rem 0.9rem;
+      font-size: 0.82rem; color: var(--muted); text-decoration: none;
+      transition: all 0.2s;
     }
-    img.profile-photo {
-      width: 7rem;
-      height: 7rem;
-      border-radius: 9999px;
-      border: 4px solid white;
-      box-shadow: 0 10px 20px rgba(0 0 0 / 0.3);
-      object-fit: cover;
-      user-select: none;
-      opacity: 0;
-      transition: opacity 1s, transform 1s;
-      transform: scale(0.95);
+    .contact-chip:hover { color: var(--accent); border-color: var(--accent); background: rgba(99,102,241,0.08); }
+    .contact-chip svg { flex-shrink: 0; }
+
+    /* Section heading */
+    h2.sec { font-size: 1rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1rem; }
+
+    /* Experience / Project cards */
+    .exp-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .exp-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .exp-date { font-size: 0.78rem; color: var(--accent); font-weight: 600; background: rgba(99,102,241,0.1); padding: 0.2rem 0.7rem; border-radius: 100px; white-space: nowrap; }
+    .exp-org { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.75rem; }
+    .exp-org a { color: var(--accent3); text-decoration: none; }
+    .exp-org a:hover { text-decoration: underline; }
+
+    ul.bullets { list-style: none; }
+    ul.bullets li { display: flex; gap: 0.6rem; font-size: 0.9rem; color: var(--muted); line-height: 1.6; margin-bottom: 0.35rem; }
+    ul.bullets li::before { content: '▸'; color: var(--accent); flex-shrink: 0; margin-top: 0.05rem; }
+
+    /* Tags */
+    .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+    .tag {
+      background: rgba(99,102,241,0.1); color: var(--accent);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 6px; padding: 0.2rem 0.6rem; font-size: 0.75rem; font-weight: 500;
+      font-family: 'JetBrains Mono', monospace;
     }
-    img.profile-photo.visible {
-      opacity: 1;
-      transform: scale(1);
+
+    /* Skills */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.6rem; }
+    .skill-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.75rem 1rem;
+      font-size: 0.82rem; font-weight: 500; color: var(--muted);
+      text-align: center; transition: all 0.2s; cursor: default;
     }
-    .name-title {
-      font-weight: 700;
-      font-size: 2.2rem;
-      color: inherit;
-      margin-bottom: 0.5rem;
-      user-select: text;
-      line-height: 1.1;
+    .skill-item:hover { color: var(--text); border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.08); transform: translateY(-2px); }
+
+    .skill-group-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 0.6rem; }
+
+    /* Cert grid */
+    .cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .cert-item {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem 1.25rem;
+      transition: all 0.2s;
     }
-    h3 {
-      font-weight: 600;
-      font-size: 1.25rem;
-      margin-bottom: 0.25rem;
-      user-select: text;
-      color: inherit;
+    .cert-item:hover { border-color: rgba(99,102,241,0.4); }
+    .cert-name { font-size: 0.88rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem; line-height: 1.4; }
+    .cert-issuer { font-size: 0.78rem; color: var(--accent3); font-weight: 500; }
+
+    /* Achievement */
+    .ach-item { display: flex; gap: 1rem; align-items: flex-start; }
+    .ach-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .ach-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+    .ach-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+    /* Mono */
+    .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent3); }
+
+    /* Download btn */
+    #dlBtn {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; border: none;
+      padding: 0.8rem 1.5rem; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; z-index: 200;
+      box-shadow: 0 8px 32px rgba(99,102,241,0.5);
+      transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem;
+      font-family: 'Inter', sans-serif;
     }
-    p {
-      font-size: 1.1rem;
-      line-height: 1.6;
-      user-select: text;
-      color: inherit;
-      margin-bottom: 0.75rem;
-    }
-    span.role-availability {
-      display: inline-block;
-      background: rgba(255 255 255 / 0.65);
-      border-radius: 9999px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #1e293b;
-      padding: 0.25rem 1rem;
-      margin-top: 0.25rem;
-      box-shadow: 0 2px 8px rgba(0 0 0 / 0.1);
-      user-select: text;
-      transition: background 0.3s, color 0.3s;
-    }
-    body.dark span.role-availability {
-      background: rgba(255 255 255 / 0.2);
-      color: #e0e7ff;
-    }
-    .contact-links a {
-      color: #2563eb;
-      font-weight: 600;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    .contact-links a:hover,
-    .contact-links a:focus-visible {
-      color: #1e40af;
-      outline: none;
-      text-decoration: underline;
-    }
-    body.dark .contact-links a {
-      color: #60a5fa;
-    }
-    body.dark .contact-links a:hover {
-      color: #93c5fd;
-    }
-    #downloadPdfBtn {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      background: #2563eb;
-      color: white;
-      padding: 0.82em 1.8em;
-      border-radius: 9999px;
-      font-weight: 600;
-      font-size: 1.1rem;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.5);
-      display: flex;
-      align-items: center;
-      gap: 0.6em;
-      z-index: 100;
-      border: none;
-      transition: background 0.3s, transform 0.15s;
-    }
-    #downloadPdfBtn:hover, #downloadPdfBtn:focus-visible {
-      background: #1e40af;
-      outline: none;
-      transform: scale(0.98);
-    }
-    #downloadPdfBtn:disabled {
-      background: #2563eb99;
-      cursor: wait;
-      transform: none;
-    }
-    #pdfSuccessMsg {
-      position: fixed;
-      bottom: 5.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #16a34a;
-      color: white;
-      padding: 0.9em 1.5em;
-      border-radius: 1rem;
-      font-weight: 600;
-      font-size: 1.1rem;
-      display: none;
-      box-shadow: 0 0 16px rgba(22, 163, 74, 0.7);
-      z-index: 101;
-    }
-    .skill-bar-container {
-      width: 100%;
-      background-color: #dbeafe;
-      border-radius: 9999px;
-      height: 18px;
-      overflow: hidden;
-      margin-bottom: 1rem;
-      box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.1);
-    }
-    body.dark .skill-bar-container {
-      background-color: #1e293b;
-    }
-    .skill-bar {
-      height: 100%;
-      width: 0;
-      background: linear-gradient(90deg, #2563eb, #3b82f6);
-      border-radius: 9999px;
-      box-shadow: 0 3px 10px rgb(37 99 235 / 0.5);
-      transition: width 1.5s ease-out;
-    }
-    body.dark .skill-bar {
-      background: linear-gradient(90deg, #60a5fa, #2563eb);
-      box-shadow: 0 4px 16px rgb(96 165 250 / 0.8);
-    }
-    .skill-label {
-      font-weight: 600;
-      margin-bottom: 0.4rem;
-      user-select: none;
-      font-size: 1rem;
-      color: inherit;
-    }
+    #dlBtn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(99,102,241,0.6); }
+    #dlBtn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+    .divider { height: 1px; background: var(--border); margin: 1.25rem 0; }
+
     @media (max-width: 640px) {
-      .name-title { font-size: 1.8rem;}
-      h3 { font-size: 1.1rem;}
-      nav.pill-nav {
-        gap: 0.6rem;
-        padding: 0.4rem;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      nav.pill-nav button {
-        padding: 0.45rem 1.2rem;
-        font-size: 0.95rem;
-      }
-      .toggle-wrapper {
-        width: 100px;
-      }
-      .toggle-track {
-        width: 94px;
-      }
-      .toggle-input:checked + .toggle-label .toggle-slider {
-        transform: translateX(62px);
-      }
-      #downloadPdfBtn {
-        bottom: 0.75rem;
-        right: 0.75rem;
-        padding: 0.7em 1.5em;
-        font-size: 1rem;
-      }
+      h1.name { font-size: 1.8rem; }
+      main { padding: 1.5rem 1rem 7rem; }
+      .cert-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <!-- Navigation with Dark Mode Toggle -->
-  <nav class="pill-nav" role="tablist" aria-label="Primary">
-    <button id="btn-profile" role="tab" aria-controls="profile" aria-selected="true" tabindex="0" class="active">Profile</button>
-    <button id="btn-experience" role="tab" aria-controls="experience" aria-selected="false" tabindex="-1">Experience</button>
-    <button id="btn-skills" role="tab" aria-controls="skills" aria-selected="false" tabindex="-1">Skills</button>
-    <button id="btn-certificates" role="tab" aria-controls="certificates" aria-selected="false" tabindex="-1">Certificates</button>
-    <button id="btn-projects" role="tab" aria-controls="projects" aria-selected="false" tabindex="-1">Projects</button>
-    <button id="btn-achievements" role="tab" aria-controls="achievements" aria-selected="false" tabindex="-1">Achievements</button>
-    <button id="btn-hobbies" role="tab" aria-controls="hobbies" aria-selected="false" tabindex="-1">Hobbies</button>
-    <div class="dark-toggle">
-      <input type="checkbox" id="dayNightToggle" class="toggle-input">
-      <label for="dayNightToggle" class="toggle-label">
-        <div class="toggle-wrapper">
-          <div class="toggle-track">
-            <span class="toggle-text" id="toggleText">DAY</span>
-            <div class="toggle-slider">
-              <span class="sun-icon">☀️</span>
-              <span class="moon-icon">🌙</span>
-            </div>
-          </div>
-        </div>
-      </label>
+
+<!-- Ambient blobs -->
+<div class="bg-blob blob1"></div>
+<div class="bg-blob blob2"></div>
+<div class="bg-blob blob3"></div>
+
+<nav id="mainNav">
+  <button class="nav-btn active" data-tab="profile">Profile</button>
+  <button class="nav-btn" data-tab="experience">Experience</button>
+  <button class="nav-btn" data-tab="projects">Projects</button>
+  <button class="nav-btn" data-tab="skills">Skills</button>
+  <button class="nav-btn" data-tab="certificates">Certificates</button>
+  <button class="nav-btn" data-tab="achievements">Achievements</button>
+  <button class="toggle-btn" id="themeBtn">☀️ Light</button>
+</nav>
+
+<main>
+
+  <!-- PROFILE -->
+  <div class="tab-section active" id="tab-profile">
+    <div class="profile-header">
+      <div class="avatar">SK</div>
+      <h1 class="name"><span class="gradient-text">Sujeet Kansal</span></h1>
+      <p class="tagline">Full-Stack Developer &nbsp;·&nbsp; CEH Certified &nbsp;·&nbsp; AI & Cybersecurity</p>
+      <div class="status-badge"><span class="status-dot"></span> Open to opportunities</div>
+      <div class="contact-row">
+        <a class="contact-chip" href="tel:+919917128864">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z"/></svg>
+          +91 9917128864
+        </a>
+        <a class="contact-chip" href="mailto:kansalsujeetdps@gmail.com">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          kansalsujeetdps@gmail.com
+        </a>
+        <a class="contact-chip" href="https://github.com/white-venom" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          github.com/white-venom
+        </a>
+        <a class="contact-chip" href="https://linkedin.com/in/kansalsujeet5310" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
+        </a>
+        <a class="contact-chip" href="https://bizflows.in" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          bizflows.in
+        </a>
+      </div>
     </div>
-  </nav>
 
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 pb-24" id="cvContent">
-    <!-- Profile -->
-    <section id="profile" role="tabpanel" tabindex="0" aria-labelledby="btn-profile">
-      <div class="flex flex-col items-center text-center">
-        <img src="profile.jpg" alt="Profile Photo" class="profile-photo visible" />
-        <h1 class="name-title">Sujeet Kansal</h1>
-        <p>Cybersecurity Analyst &bull; Ethical Hacker &bull; Software Developer &bull; Frontend Developer</p>
-        <span class="role-availability">Available for full-time</span>
-        <div class="contact-links flex flex-wrap justify-center gap-5 mt-4 text-base">
-          <span><strong>Phone:</strong> <a href="tel:+919917128864">+91 9917128864</a></span>
-          <span><strong>Email:</strong> <a href="mailto:kansalsujeetdps@gmail.com">kansalsujeetdps@gmail.com</a></span>
-          <span><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/sujeet-kansal-102328282" target="_blank" rel="noopener noreferrer">Sujeet Kansal</a></span>
-          <span><strong>GitHub:</strong> <a href="https://github.com/white-venom" target="_blank" rel="noopener noreferrer">white-venom</a></span>
+    <div class="card">
+      <h2 class="sec">Education</h2>
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">B.Tech — Computer Science Engineering (Cybersecurity)</div>
+          <div class="exp-org">Bennett University, Greater Noida, India</div>
+        </div>
+        <span class="exp-date">2023 – 2027</span>
+      </div>
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:0.5rem;">
+        <div><span class="mono">CGPA</span> <span style="font-weight:700;color:var(--text)"> 7.54</span></div>
+        <div><span class="mono">Year</span> <span style="font-weight:700;color:var(--text)"> 3rd Year (2025–26)</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">About</h2>
+      <p style="color:var(--muted);font-size:0.92rem;line-height:1.75;">
+        CS Engineering student specializing in Cybersecurity with hands-on experience building production-grade full-stack applications, AI/ML systems, and security tools. CEH Certified. Founder of BizFlows Tech. Passionate about the intersection of AI and cybersecurity.
+      </p>
+    </div>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <div class="tab-section" id="tab-experience">
+    <div class="card">
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">Software Developer Intern</div>
+          <div class="exp-org">AFI Digital Services LLP — Noida, India</div>
+        </div>
+        <span class="exp-date">Feb 2026 – Present</span>
+      </div>
+      <ul class="bullets">
+        <li>Contributing to frontend and backend development on client-facing web applications.</li>
+        <li>Conducting vulnerability assessments aligned with OWASP Top 10; preparing structured remediation reports.</li>
+        <li>Building Python automation scripts for internal API workflows and data processing tasks.</li>
+      </ul>
+      <div class="tags"><span class="tag">Python</span><span class="tag">OWASP</span><span class="tag">REST APIs</span><span class="tag">Web Dev</span></div>
+    </div>
+
+    <div class="card">
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">Founder & Full-Stack Developer</div>
+          <div class="exp-org"><a href="https://bizflows.in" target="_blank">BizFlows Tech · bizflows.in</a></div>
+        </div>
+        <span class="exp-date">Dec 2025 – Present</span>
+      </div>
+      <ul class="bullets">
+        <li>Founded freelance web dev venture; delivered 2 paid production deployments using AI-assisted workflows (Cursor, Claude Code).</li>
+        <li>Delivered <strong style="color:var(--text)">xcplllp.com</strong> — corporate site with AI chatbot, Razorpay payments, and Google Calendar booking.</li>
+        <li>Built <strong style="color:var(--text)">caakanksha.com</strong> — CA firm portal with role-based access, document workflows, and Gemini API SEO automation.</li>
+        <li>Developing SaaS rental model for digital marketing automation tools targeting Indian SMBs.</li>
+      </ul>
+      <div class="tags"><span class="tag">React</span><span class="tag">FastAPI</span><span class="tag">Razorpay</span><span class="tag">Gemini API</span><span class="tag">Supabase</span><span class="tag">Vercel</span></div>
+    </div>
+
+    <div class="card">
+      <div class="exp-header">
+        <div>
+          <div class="exp-title">Remote Technology Consultant</div>
+          <div class="exp-org"><a href="https://caakanksha.com" target="_blank">CA Akanksha Shashank & Associates · caakanksha.com</a></div>
+        </div>
+        <span class="exp-date">Jan 2026 – Present</span>
+      </div>
+      <ul class="bullets">
+        <li>Retained post-delivery for ongoing feature additions, performance optimization, and security reviews.</li>
+      </ul>
+      <div class="tags"><span class="tag">Consulting</span><span class="tag">Security</span><span class="tag">Performance</span></div>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+  <div class="tab-section" id="tab-projects">
+    <div class="card">
+      <div class="exp-header">
+        <div><div class="exp-title">Vantix — Automated Trading Bot</div></div>
+        <span class="exp-date">2026</span>
+      </div>
+      <ul class="bullets">
+        <li>Built full-stack algo trading system with FastAPI backend and Next.js dashboard running 6 concurrent strategies (ORB, VWAP, EMA) on live NSE data.</li>
+        <li>Implemented paper trading engine with Gemini AI signal analysis, news sentiment scoring, and strategy backtesting with position sizing and stop-loss logic.</li>
+      </ul>
+      <div class="tags"><span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">Next.js</span><span class="tag">TA-Lib</span><span class="tag">Yahoo Finance API</span><span class="tag">SQLite</span><span class="tag">Gemini AI</span></div>
+    </div>
+
+    <div class="card">
+      <div class="exp-header">
+        <div><div class="exp-title">Multimodal Sentiment Analysis</div></div>
+        <span class="exp-date">2025</span>
+      </div>
+      <ul class="bullets">
+        <li>Designed dual-model pipeline fusing BERT text embeddings with ResNet50 image features for cross-modal sentiment prediction.</li>
+        <li>Outperformed single-modality baselines by combining textual and visual signal streams into a unified prediction layer.</li>
+      </ul>
+      <div class="tags"><span class="tag">Python</span><span class="tag">BERT</span><span class="tag">ResNet50</span><span class="tag">PyTorch</span><span class="tag">HuggingFace</span></div>
+    </div>
+
+    <div class="card">
+      <div class="exp-header">
+        <div><div class="exp-title">Resumetrics — AI Resume Classifier</div></div>
+        <span class="exp-date">2024</span>
+      </div>
+      <ul class="bullets">
+        <li>Built multi-label resume classification system using TF-IDF and BERT embeddings to predict job domain categories.</li>
+        <li>Implemented full pipeline: preprocessing, feature extraction, model training, and evaluation via precision/recall metrics.</li>
+      </ul>
+      <div class="tags"><span class="tag">Python</span><span class="tag">TF-IDF</span><span class="tag">BERT</span><span class="tag">scikit-learn</span></div>
+    </div>
+
+    <div class="card">
+      <div class="exp-header">
+        <div><div class="exp-title">Phishing URL Detector</div></div>
+        <span class="exp-date">2024</span>
+      </div>
+      <ul class="bullets">
+        <li>Classified malicious URLs using lexical NLP features; added CNN-based screenshot analysis to detect phishing sites visually.</li>
+      </ul>
+      <div class="tags"><span class="tag">Python</span><span class="tag">NLP</span><span class="tag">CNN</span><span class="tag">OpenCV</span></div>
+    </div>
+
+    <div class="card">
+      <div class="exp-header">
+        <div><div class="exp-title">Local Firewall System</div></div>
+        <span class="exp-date">2024</span>
+      </div>
+      <ul class="bullets">
+        <li>Built Linux-based firewall with intrusion detection rules, traffic filtering, and real-time Snort alert generation on Metasploitable2.</li>
+      </ul>
+      <div class="tags"><span class="tag">Linux</span><span class="tag">iptables</span><span class="tag">nftables</span><span class="tag">Snort</span></div>
+    </div>
+
+    <div class="card">
+      <div class="exp-header">
+        <div><div class="exp-title">Smart Speaker "Jarvis"</div></div>
+        <span class="exp-date">2025</span>
+      </div>
+      <ul class="bullets">
+        <li>Built AI voice assistant on Raspberry Pi with wake-word detection, Spotify streaming, OLED display, weather/news feed, and smart home control.</li>
+      </ul>
+      <div class="tags"><span class="tag">Raspberry Pi</span><span class="tag">Python</span><span class="tag">Spotify API</span><span class="tag">OLED</span></div>
+    </div>
+
+    <div class="card">
+      <div class="exp-header">
+        <div><div class="exp-title">IoT Security Projects</div></div>
+        <span class="exp-date">2023–2025</span>
+      </div>
+      <ul class="bullets">
+        <li>Wi-Fi Cloner & Blocker (ESP32) — replicates and blocks wireless networks for security testing.</li>
+        <li>ESP32 Motion Detection Camera — IoT integration for surveillance and streaming.</li>
+        <li>Rubber Ducky BadUSB (ATtiny85) — USB payload delivery system for iOS passcode security testing.</li>
+      </ul>
+      <div class="tags"><span class="tag">ESP32</span><span class="tag">Arduino</span><span class="tag">ATtiny85</span><span class="tag">BadUSB</span></div>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="tab-section" id="tab-skills">
+    <div class="card">
+      <h2 class="sec">Languages</h2>
+      <div class="skills-grid">
+        <div class="skill-item">Python</div>
+        <div class="skill-item">C++</div>
+        <div class="skill-item">Java</div>
+        <div class="skill-item">Bash</div>
+        <div class="skill-item">SQL</div>
+        <div class="skill-item">HTML / CSS</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Web & Integrations</h2>
+      <div class="skills-grid">
+        <div class="skill-item">React.js</div>
+        <div class="skill-item">FastAPI</div>
+        <div class="skill-item">Next.js</div>
+        <div class="skill-item">Tailwind CSS</div>
+        <div class="skill-item">REST APIs</div>
+        <div class="skill-item">Razorpay API</div>
+        <div class="skill-item">Gemini API</div>
+        <div class="skill-item">Google Calendar API</div>
+        <div class="skill-item">Supabase</div>
+        <div class="skill-item">Vercel</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">ML / AI / NLP</h2>
+      <div class="skills-grid">
+        <div class="skill-item">BERT</div>
+        <div class="skill-item">ResNet50</div>
+        <div class="skill-item">TF-IDF</div>
+        <div class="skill-item">PyTorch</div>
+        <div class="skill-item">scikit-learn</div>
+        <div class="skill-item">TensorFlow</div>
+        <div class="skill-item">HuggingFace</div>
+        <div class="skill-item">TA-Lib</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Cybersecurity</h2>
+      <div class="skills-grid">
+        <div class="skill-item">Kali Linux</div>
+        <div class="skill-item">Burp Suite</div>
+        <div class="skill-item">Nmap</div>
+        <div class="skill-item">Metasploit</div>
+        <div class="skill-item">OWASP Top 10</div>
+        <div class="skill-item">iptables</div>
+        <div class="skill-item">Snort</div>
+        <div class="skill-item">CEH Certified</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="sec">Tools & Others</h2>
+      <div class="skills-grid">
+        <div class="skill-item">Git</div>
+        <div class="skill-item">Cursor</div>
+        <div class="skill-item">Claude Code</div>
+        <div class="skill-item">Adobe Premiere</div>
+        <div class="skill-item">After Effects</div>
+        <div class="skill-item">ESP32 / IoT</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CERTIFICATES -->
+  <div class="tab-section" id="tab-certificates">
+    <div class="card">
+      <h2 class="sec">Cybersecurity</h2>
+      <div class="cert-grid">
+        <div class="cert-item">
+          <div class="cert-name">Certified Ethical Hacker (CEH)</div>
+          <div class="cert-issuer">EC-Council · 2026</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">Learn Ethical Hacking From Scratch 2024</div>
+          <div class="cert-issuer">Udemy</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">Bug Bounty Hunting & Web Security Testing</div>
+          <div class="cert-issuer">Udemy</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">Network Defense</div>
+          <div class="cert-issuer">Cisco Networking Academy</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">Introduction to Cybersecurity</div>
+          <div class="cert-issuer">Cisco Networking Academy</div>
         </div>
       </div>
-      <div class="content-wrapper mt-8">
-        <h3>Education</h3>
-        <ul class="list-disc list-inside leading-relaxed">
-          <li>
-            <strong>B.Tech in Computer Science and Engineering with Cyber Security [2023-2027]</strong><br />
-            Bennett University (The Times Group), Greater Noida<br />
-            Current year - 2025-2026 (3rd Year)
-          </li>
-          <li>
-            <strong>Schooling:</strong><br />
-            • Lal Bahadur Shastri Senior Secondary School, Kota<br />
-            • Gurukul The School, Ghaziabad<br />
-            • Delhi Public School, Hapur
-          </li>
-        </ul>
-      </div>
-    </section>
+    </div>
 
-    <!-- Experience -->
-    <section id="experience" role="tabpanel" tabindex="0" aria-labelledby="btn-experience" class="hidden" aria-hidden="true">
-      <div class="content-wrapper">
-        <p class="mb-4">As a Computer Science student specializing in Cybersecurity, I have worked on various projects combining programming, security, and hardware integration:</p>
-        <ul class="list-disc list-inside leading-relaxed">
-          <li><strong>Cybersecurity Projects:</strong> Firewall development, network penetration testing, password logging systems</li>
-          <li><strong>Software Development:</strong> AI-powered applications, games, calculators using Python, Java, and web technologies</li>
-          <li><strong>Hardware Integration:</strong> IoT projects with ESP32, ATtiny85-based security tools</li>
-          <li><strong>Web Development:</strong> Frontend development for chatbots and interactive applications</li>
-          <li><strong>Automation Tools:</strong> Python scripts for various automation tasks</li>
-        </ul>
-        <p class="mt-4 text-gray-500 dark:text-gray-400 italic">See Projects section for detailed project descriptions.</p>
-      </div>
-    </section>
-
-    <!-- Skills -->
-    <section id="skills" role="tabpanel" tabindex="0" aria-labelledby="btn-skills" class="hidden" aria-hidden="true">
-      <div class="flex flex-wrap gap-2 max-w-2xl mx-auto mb-6">3
-        <span class="skill-badge">Python</span>
-        <span class="skill-badge">Java</span>
-        <span class="skill-badge">C++ / DSA</span>
-        <span class="skill-badge">HTML</span>
-        <span class="skill-badge">CSS</span>
-        <span class="skill-badge">React.js</span>
-        <span class="skill-badge">SQL</span>
-        <span class="skill-badge">R</span>
-        <span class="skill-badge">Cybersecurity</span>
-        <span class="skill-badge">Ethical Hacking</span>
-        <span class="skill-badge">Network Security</span>
-        <span class="skill-badge">Penetration Testing</span>
-        <span class="skill-badge">Nmap</span>
-        <span class="skill-badge">Burp Suite</span>
-        <span class="skill-badge">BlueShark</span>
-        <span class="skill-badge">Snort</span>
-        <span class="skill-badge">ESP32</span>
-        <span class="skill-badge">ATtiny85</span>
-        <span class="skill-badge">IoT</span>
-        <span class="skill-badge">Adobe Premiere Pro</span>
-        <span class="skill-badge">After Effects</span>
-        <span class="skill-badge">Video Editing</span>
-        <span class="skill-badge">Machine Learning</span>
-        <span class="skill-badge">TensorFlow</span>
-      </div>
-      
-      <div class="content-wrapper mt-8 max-w-2xl mx-auto">
-        <!-- Skill categories -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <h3 class="mb-3">Programming Languages</h3>
-            <ul class="list-disc list-inside leading-relaxed">
-              <li>Proficient in Python, Java, and DSA in C++</li>
-              <li>Experience with R for data analysis</li>
-              <li>SQL for database management</li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="mb-3">Web Development</h3>
-            <ul class="list-disc list-inside leading-relaxed">
-              <li>HTML, CSS, and React.js</li>
-              <li>Responsive web applications</li>
-              <li>Interactive frontend development</li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="mb-3">Cybersecurity</h3>
-            <ul class="list-disc list-inside leading-relaxed">
-              <li>Ethical hacking techniques</li>
-              <li>Network security and penetration testing</li>
-              <li>Tools: BlueShark, Nmap, Burp Suite, Snort</li>
-              <li>Vulnerability analysis and security practices</li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="mb-3">Other Skills</h3>
-            <ul class="list-disc list-inside leading-relaxed">
-              <li>Adobe Premiere Pro and After Effects</li>
-              <li>IoT development with ESP32</li>
-              <li>Hardware security tools (ATtiny85)</li>
-              <li>Machine Learning with TensorFlow</li>
-            </ul>
-          </div>
+    <div class="card">
+      <h2 class="sec">AI & Data Science</h2>
+      <div class="cert-grid">
+        <div class="cert-item">
+          <div class="cert-name">Artificial Intelligence Fundamentals</div>
+          <div class="cert-issuer">IBM · 2025</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">Databases & SQL for Data Science with Python</div>
+          <div class="cert-issuer">IBM · Coursera</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">Data Visualization with R</div>
+          <div class="cert-issuer">IBM · Coursera</div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Certificates -->
-    <section id="certificates" role="tabpanel" tabindex="0" aria-labelledby="btn-certificates" class="hidden" aria-hidden="true">
-      <div class="content-wrapper max-w-2xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 class="mb-4">Programming & Development</h3>
-            <ul class="list-disc list-inside leading-relaxed space-y-2">
-              <li><strong>C++ Basic Structures:</strong> Vectors, Pointers, Strings, and Files - Codio</li>
-              <li><strong>C++ Basics:</strong> Selection and Iteration - Codio</li>
-              <li><strong>C++ Object Basics:</strong> Functions, Recursion, and Objects - Codio</li>
-              <li><strong>Object-Oriented C++:</strong> Inheritance and Encapsulation - Codio</li>
-              <li><strong>Object-Oriented Data Structures in C++</strong> - University of Illinois Urbana-Champaign</li>
-              <li><strong>Programming in C++:</strong> A Hands-on Introduction Specialization - Codio</li>
-            </ul>
-          </div>
-          <div>
-            <h3 class="mb-4">Data Science & Analytics</h3>
-            <ul class="list-disc list-inside leading-relaxed space-y-2">
-              <li><strong>Data Visualization with R</strong> - IBM</li>
-              <li><strong>Databases and SQL for Data Science with Python</strong> - IBM</li>
-            </ul>
-            
-            <h3 class="mb-4 mt-6">Cybersecurity</h3>
-            <ul class="list-disc list-inside leading-relaxed space-y-2">
-              <li><strong>Network Defense</strong> - Cisco</li>
-              <li><strong>Introduction to Cybersecurity</strong> - Cisco</li>
-              <li><strong>Learn Ethical Hacking From Scratch 2024</strong> - Udemy</li>
-              <li><strong>Learn Bug Bounty Hunting & Web Security Testing From Scratch</strong> - Udemy</li>
-            </ul>
-          </div>
+    <div class="card">
+      <h2 class="sec">Programming — C++ Specialization</h2>
+      <div class="cert-grid">
+        <div class="cert-item">
+          <div class="cert-name">Programming in C++: A Hands-on Introduction (Specialization)</div>
+          <div class="cert-issuer">Codio · Coursera · 4 Courses</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">Object-Oriented Data Structures in C++</div>
+          <div class="cert-issuer">University of Illinois · Coursera</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">OOP C++: Inheritance & Encapsulation</div>
+          <div class="cert-issuer">Codio · Coursera</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">C++ Basics: Selection & Iteration</div>
+          <div class="cert-issuer">Codio · Coursera</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">C++ Basic Structures: Vectors, Pointers, Strings & Files</div>
+          <div class="cert-issuer">Codio · Coursera</div>
+        </div>
+        <div class="cert-item">
+          <div class="cert-name">C++ Object Basics: Functions, Recursion & Objects</div>
+          <div class="cert-issuer">Codio · Coursera</div>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Projects -->
-    <section id="projects" role="tabpanel" tabindex="0" aria-labelledby="btn-projects" class="hidden" aria-hidden="true">
-      <div class="content-wrapper max-w-3xl mx-auto">
-        <div class="space-y-6">
-          <!-- Software Development Projects -->
-          <div>
-            <h3 class="mb-3">Software Development</h3>
-            <ul class="list-disc list-inside leading-relaxed space-y-2">
-              <li><strong>Scientific Calculator (Python with UI):</strong> Fully functional calculator with GUI using Python and Tkinter</li>
-              <li><strong>Hangman Game (Python):</strong> Classic word-guessing game with text-based interaction</li>
-              <li><strong>Brick Breaker Game (Java):</strong> Arcade-style game focusing on collision detection and user input</li>
-              <li><strong>Autotyper (Python):</strong> Automation script for simulating automatic typing</li>
-              <li><strong>Message Spammer (Python):</strong> Testing tool for message automation</li>
-            </ul>
-          </div>
-
-          <!-- AI/ML Projects -->
-          <div>
-            <h3 class="mb-3">AI & Machine Learning</h3>
-            <ul class="list-disc list-inside leading-relaxed space-y-2">
-              <li><strong>AI Digit Recognizer (Python):</strong> Machine learning model using TensorFlow for handwritten digit recognition</li>
-              <li><strong>AI CV Checker (R and Python):</strong> AI-powered resume analyzer that provides feedback based on job descriptions</li>
-            </ul>
-          </div>
-
-          <!-- Web Development Projects -->
-          <div>
-            <h3 class="mb-3">Web Development</h3>
-            <ul class="list-disc list-inside leading-relaxed space-y-2">
-              <li><strong>Museum Chatbot (Frontend):</strong> Interactive chatbot interface for visitor engagement</li>
-            </ul>
-          </div>
-
-          <!-- Cybersecurity Projects -->
-          <div>
-            <h3 class="mb-3">Cybersecurity & Network Security</h3>
-            <ul class="list-disc list-inside leading-relaxed space-y-2">
-              <li><strong>Password Logger (BlueShark):</strong> Network security testing and password analysis tool</li>
-              <li><strong>Local Firewall System:</strong> Comprehensive firewall using iptables, nftables, and Snort on Metasploitable2 with intrusion detection rules</li>
-              <li><strong>Automated Network Penetration Testing (Python):</strong> Script for automated vulnerability scanning and assessment</li>
-            </ul>
-          </div>
-
-          <!-- Hardware & IoT Projects -->
-          <div>
-            <h3 class="mb-3">Hardware & IoT</h3>
-            <ul class="list-disc list-inside leading-relaxed space-y-2">
-              <li><strong>WiFi Cloner (ESP32):</strong> System for replicating wireless networks for security testing</li>
-              <li><strong>WiFi Blocker (ESP32):</strong> Tool to prevent unauthorized network access</li>
-              <li><strong>ESP32 Camera Integration:</strong> IoT project for data capture and streaming</li>
-              <li><strong>Rubber Ducky (ATtiny85):</strong> USB payload delivery system for penetration testing</li>
-              <li><strong>iOS 4-Digit Passcode Breaker (ATtiny85):</strong> Hardware tool for security testing on mobile devices</li>
-            </ul>
-          </div>
+  <!-- ACHIEVEMENTS -->
+  <div class="tab-section" id="tab-achievements">
+    <div class="card">
+      <div class="ach-item" style="margin-bottom:1.5rem;">
+        <div class="ach-icon">🏆</div>
+        <div>
+          <div class="ach-title">Smart India Hackathon 2024 — 101st Rank</div>
+          <div class="ach-desc">Secured 101st rank among 800+ teams across India in All India SIH 2024, competing in the national-level government hackathon.</div>
         </div>
       </div>
-    </section>
-
-    <!-- Achievements -->
-    <section id="achievements" role="tabpanel" tabindex="0" aria-labelledby="btn-achievements" class="hidden" aria-hidden="true">
-      <div class="content-wrapper max-w-2xl mx-auto">
-        <ul class="list-disc list-inside leading-relaxed">
-          <li><strong>Smart India Hackathon 2024:</strong> Secured 201st rank among more than 800 teams in All India SIH 2024</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- Hobbies -->
-    <section id="hobbies" role="tabpanel" tabindex="0" aria-labelledby="btn-hobbies" class="hidden" aria-hidden="true">
-      <div class="content-wrapper max-w-2xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ul class="list-disc list-inside leading-relaxed space-y-2">
-            <li>Exploring ethical hacking and cybersecurity</li>
-            <li>Reviewing and experimenting with tech gadgets</li>
-            <li>Creative content creation and video editing</li>
-            <li>Working on IoT projects and hardware integration</li>
-          </ul>
-          <ul class="list-disc list-inside leading-relaxed space-y-2">
-            <li>Video games, especially strategy and simulation</li>
-            <li>Continuously learning new technologies</li>
-            <li>Enhancing skills in software development</li>
-            <li>Engaging in coding challenges and problem-solving</li>
-          </ul>
+      <div class="divider"></div>
+      <div class="ach-item" style="margin-bottom:1.5rem;margin-top:1.5rem;">
+        <div class="ach-icon">🎮</div>
+        <div>
+          <div class="ach-title">University Valorant Tournament — Top 10</div>
+          <div class="ach-desc">Ranked in the top 10 players in the University-level Valorant competitive tournament 2024.</div>
         </div>
       </div>
-    </section>
-  </main>
+      <div class="divider"></div>
+      <div class="ach-item" style="margin-top:1.5rem;">
+        <div class="ach-icon">🚀</div>
+        <div>
+          <div class="ach-title">2 Live Production Deployments</div>
+          <div class="ach-desc">Independently acquired and delivered 2 paid client web applications in production — xcplllp.com and caakanksha.com — under BizFlows Tech.</div>
+        </div>
+      </div>
+    </div>
 
-  <button id="downloadPdfBtn" aria-label="Download your CV as PDF" title="Download CV as PDF">
-    <svg xmlns="http://www.w3.org/2000/svg" class="inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16m8-8H4"/></svg>
-    Download PDF
-  </button>
+    <div class="card">
+      <h2 class="sec">Languages & Interests</h2>
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+        <div>
+          <div class="skill-group-title" style="margin-bottom:0.5rem;">Languages</div>
+          <div style="color:var(--muted);font-size:0.9rem;">English (Professional) &nbsp;·&nbsp; Hindi (Native)</div>
+        </div>
+        <div>
+          <div class="skill-group-title" style="margin-bottom:0.5rem;">Interests</div>
+          <div style="color:var(--muted);font-size:0.9rem;">Ethical Hacking &nbsp;·&nbsp; IoT Projects &nbsp;·&nbsp; AI Research &nbsp;·&nbsp; Content Creation &nbsp;·&nbsp; Video Editing &nbsp;·&nbsp; Gaming</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<button id="dlBtn">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  Download PDF
+</button>
 
 <script>
-  const sections = ['profile','experience','skills','certificates','projects','achievements','hobbies'];
-
-  function showSection(section) {
-    sections.forEach(id => {
-      const el = document.getElementById(id);
-      const btn = document.getElementById('btn-' + id);
-      const isActive = (id === section);
-      if(el) el.classList.toggle('hidden', !isActive);
-      if(el) el.setAttribute('aria-hidden', !isActive);
-      if(btn) {
-        btn.classList.toggle('active', isActive);
-        btn.setAttribute('aria-selected', isActive);
-        btn.tabIndex = isActive ? 0 : -1;
-      }
-      if(isActive && el) el.focus();
+  // Tab switching
+  const tabs = document.querySelectorAll('.nav-btn[data-tab]');
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-  }
-  
-  sections.forEach(id => {
-    const btn = document.getElementById('btn-' + id);
-    if(btn) {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        showSection(id);
-        if(id === 'skills') animateSkillBars();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-      btn.addEventListener('keydown', e => {
-        let idx = sections.indexOf(id);
-        if(e.key === "ArrowRight" || e.key === "ArrowDown") {
-          e.preventDefault();
-          const nxt = sections[(idx + 1) % sections.length];
-          document.getElementById('btn-' + nxt).focus();
-        } else if(e.key === "ArrowLeft" || e.key === "ArrowUp") {
-          e.preventDefault();
-          const prev = sections[(idx - 1 + sections.length) % sections.length];
-          document.getElementById('btn-' + prev).focus();
-        }
-      });
-    }
-  });
-  showSection('profile');
-
-  function animateSkillBars() {
-    const bars = document.querySelectorAll('#skills .skill-bar');
-    bars.forEach(bar => bar.style.width = '0');
-    setTimeout(() => {
-      bars.forEach(bar => {
-        const lvl = bar.getAttribute('data-level');
-        bar.style.width = lvl + '%';
-      });
-    }, 150);
-  }
-
-  if (!document.getElementById('skills').classList.contains('hidden')) {
-    animateSkillBars();
-  }
-
-  const toggle = document.getElementById('dayNightToggle');
-  const toggleText = document.getElementById('toggleText');
-
-  toggle.addEventListener('change', () => {
-    document.body.classList.toggle('dark', toggle.checked);
-    toggleText.textContent = toggle.checked ? 'NIGHT' : 'DAY';
   });
 
-  const pdfBtn = document.getElementById('downloadPdfBtn');
-  const pdfMsg = document.createElement('div');
-  pdfMsg.id = 'pdfSuccessMsg';
-  pdfMsg.textContent = '🎉 PDF downloaded successfully!';
-  document.body.appendChild(pdfMsg);
-  pdfMsg.style.display = 'none';
+  // Theme toggle
+  const themeBtn = document.getElementById('themeBtn');
+  let isLight = false;
+  themeBtn.addEventListener('click', () => {
+    isLight = !isLight;
+    document.body.classList.toggle('light', isLight);
+    themeBtn.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+  });
 
-  pdfBtn.addEventListener('click', async () => {
-    pdfBtn.disabled = true;
-    const originalText = pdfBtn.textContent;
-    pdfBtn.textContent = 'Generating PDF...';
-    window.scrollTo(0, 0);
+  // PDF download
+  document.getElementById('dlBtn').addEventListener('click', async function() {
+    this.disabled = true;
+    this.textContent = 'Generating...';
     try {
-      const canvas = await html2canvas(document.querySelector('main'), { scale: 2, backgroundColor: null });
-      const imgData = canvas.toDataURL('image/png');
+      const main = document.querySelector('main');
+      const canvas = await html2canvas(main, { scale: 2, backgroundColor: '#0a0a0f', useCORS: true });
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'pt', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgProps = {
-        width: canvas.width,
-        height: canvas.height
-      };
-      const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height);
-      const imgWidth = imgProps.width * ratio;
-      const imgHeight = imgProps.height * ratio;
-      const x = (pageWidth - imgWidth) / 2;
-      const y = 20;
-      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+      const pw = pdf.internal.pageSize.getWidth();
+      const ph = pdf.internal.pageSize.getHeight();
+      const ratio = Math.min(pw / canvas.width, ph / canvas.height);
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width * ratio, canvas.height * ratio);
       pdf.save('Sujeet_Kansal_CV.pdf');
-
-      pdfMsg.style.display = 'block';
-      setTimeout(() => { pdfMsg.style.display = 'none'; }, 1800);
-    } catch (error) {
-      alert('Failed to generate PDF. Please try again.');
-    }
-    pdfBtn.disabled = false;
-    pdfBtn.textContent = originalText;
-    pdfBtn.blur();
-  });
-
-  window.addEventListener('scroll', () => {
-    const nav = document.querySelector('nav.pill-nav');
-    if(window.scrollY > 10) {
-      nav.style.boxShadow = '0 4px 24px rgba(0,0,0,0.12)';
-    } else {
-      nav.style.boxShadow = '';
-    }
+    } catch(e) { alert('PDF generation failed.'); }
+    this.disabled = false;
+    this.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
   });
 </script>
 </body>
 </html>
-
-
